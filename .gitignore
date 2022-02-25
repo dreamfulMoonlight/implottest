@@ -1,0 +1,10 @@
+lib/
+include/
+tool/
+build*
+*.txt.user
+*.pro.user
+*.orig
+.vs
+.cache
+im*
