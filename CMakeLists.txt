@@ -39,6 +39,8 @@ add_executable(implot_test
     imgui_impl_opengl3_loader.h
     imgui_impl_opengl3.h
     imgui_impl_opengl3.cpp
+    openglcontainer.hpp
+    openglcontainer.cpp
 #    imgui_impl_glfw.h
 #    imgui_impl_glfw.cpp
     implot_internal.h
@@ -51,13 +53,14 @@ add_executable(implot_test
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 target_link_libraries(implot_test PUBLIC Qt5::Widgets Qt5::Gui Qt5::Core)
-#target_link_libraries(implot_test PUBLIC
-#    ${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3.dll
-#    ${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3_mt.lib
-#    ${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw3dll.lib)
+target_link_libraries(implot_test PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/freeglut.lib
+)
 
-#add_custom_command(
-#    TARGET implot_test POST_BUILD
-#    COMMAND  ${CMAKE_COMMAND} -E copy_if_different
-#    ${CMAKE_CURRENT_SOURCE_DIR}/glfw3.dll
-#    $<TARGET_FILE_DIR:implot_test>)
+message(STATUS ${CMAKE_CURRENT_SOURCE_DIR}/lib/freeglut.lib)
+
+add_custom_command(
+    TARGET implot_test POST_BUILD
+    COMMAND  ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib/freeglut.dll
+    $<TARGET_FILE_DIR:implot_test>)

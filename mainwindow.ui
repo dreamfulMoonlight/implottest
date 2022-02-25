@@ -14,13 +14,14 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1">
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout">
-      <item>
-       <widget class="QGraphicsView" name="graphicsView"/>
-      </item>
-     </layout>
+     <widget class="QGraphicsView" name="graphicsView"/>
+    </item>
+    <item>
+     <widget class="OpenGLContainer" name="widget" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_3"/>
+     </widget>
     </item>
    </layout>
   </widget>
@@ -36,6 +37,22 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>OpenGLContainer</class>
+   <extends>QWidget</extends>
+   <header>openglcontainer.hpp</header>
+   <container>1</container>
+   <slots>
+    <slot>zoomIn()</slot>
+    <slot>zoomOut()</slot>
+    <slot>zoomReset()</slot>
+    <slot>resetTranslation()</slot>
+    <slot>resetRotation()</slot>
+    <slot>changeViewMode(int)</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
