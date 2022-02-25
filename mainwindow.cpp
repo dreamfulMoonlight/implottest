@@ -46,7 +46,7 @@ void MainWindow::show2DPolyItem()
     plot->setTitle(QString("Test title"));
     plot->setAxisText(0, QString("x"));
     plot->setAxisText(1, QString("y"));
-    plot->setAutoGrid(false);
+    // plot->setAutoGrid(false);
     plot->setAbscissaRange(0, 10);
     plot->setOrdinateRange(-255, 255);
     qDebug() << plot->boundingRect().x() << plot->boundingRect().y() << plot->boundingRect().width()

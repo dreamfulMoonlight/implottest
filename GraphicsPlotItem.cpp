@@ -462,7 +462,8 @@ void GraphicsPlotItemPrivate::calculateAbscissGrid()
                 for (int i = 0; i < count; i++)
                 {
                     guidCoordinate = minValue + i * guides->step;
-                    lines->operator[](i) = QLineF(guidCoordinate, ordinateRange.max, guidCoordinate, ordinateRange.min);
+                    // lines->operator[](i) = QLineF(guidCoordinate, ordinateRange.max, guidCoordinate,
+                    // ordinateRange.min);
                     nocksList.append(new QGraphicsSimpleTextItem(QString::number(guidCoordinate)));
                     nocksList.last()->setPos(guidCoordinate, ordinateRange.min);
                 }
@@ -509,7 +510,8 @@ void GraphicsPlotItemPrivate::calculateOrdinateGrid()
                 for (int i = 0; i < count; i++)
                 {
                     guidCoordinate = minValue + i * guides->step;
-                    lines->operator[](i) = QLineF(abscissRange.max, guidCoordinate, abscissRange.min, guidCoordinate);
+                    // lines->operator[](i) = QLineF(abscissRange.max, guidCoordinate, abscissRange.min,
+                    // guidCoordinate);
                     nocksList.append(new QGraphicsSimpleTextItem(QString::number(guidCoordinate)));
                     nocksList.last()->setPos(abscissRange.min, guidCoordinate);
                 }
