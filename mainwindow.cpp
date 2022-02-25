@@ -43,15 +43,15 @@ void MainWindow::show2DPolyItem()
     GraphicsPlotItem *plot = new GraphicsPlotItem();
     scene->addItem(plot);
     plot->setRect(QRect(0, 0, 500, 500));
-    plot->setTitle(QString("Test title"));
+    //    plot->setTitle(QString("Test title"));
     plot->setAxisText(0, QString("x"));
     plot->setAxisText(1, QString("y"));
     // plot->setAutoGrid(false);
-    plot->setAbscissaRange(0, 10);
-    plot->setOrdinateRange(-255, 255);
-    qDebug() << plot->boundingRect().x() << plot->boundingRect().y() << plot->boundingRect().width()
-             << plot->boundingRect().height();
-    scene->setSceneRect(plot->boundingRect());
+    plot->setAbscissaRange(0, 255);
+    plot->setOrdinateRange(0, 10000);
+    auto bounding_rect = plot->boundingRect();
+    scene->setSceneRect(
+        QRect(bounding_rect.x() + 127, bounding_rect.y() - 500, bounding_rect.width(), bounding_rect.height()));
     QVector<double> absciss = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     QVector<double> ordinate = {12, 45, 34, 56, 76, 34, 56, 12, 4, 56};
 
