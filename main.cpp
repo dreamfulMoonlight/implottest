@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     // w.showOpenglWidget();
+    w.show2DPolyItem();
     w.show();
-    // w.show2DPolyItem();
     return a.exec();
 }

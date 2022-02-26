@@ -1,6 +1,8 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "GraphicsPlotItem.h"
+#include <QGraphicsView>
 #include <QMainWindow>
 #include <QOpenGLFunctions>
 #include <QOpenGLWidget>
@@ -28,6 +30,22 @@ protected:
     void paintGL();
 };
 
+class MyView : public QGraphicsView
+{
+    Q_OBJECT
+
+public:
+    explicit MyView(QWidget *parent = 0);
+
+protected:
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+
+private:
+    QWidget *m_parent_widget{nullptr};
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -40,7 +58,12 @@ public:
     void show2DPolyItem();
     void showOpenglWidget();
 
+    void resetMinMaxLine(QPoint point);
+
 private:
+    MyView *m_view{nullptr};
+    GraphicsPlotItem *m_plot{nullptr};
+    Graphics2DGraphItem *m_data_item{nullptr};
     Ui::MainWindow *ui;
 };
 #endif  // MAINWINDOW_H

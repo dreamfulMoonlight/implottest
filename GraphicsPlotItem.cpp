@@ -133,6 +133,7 @@ GraphicsPlotItemPrivate::GraphicsPlotItemPrivate(GraphicsPlotItem *parent)
     q_ptr = parent;
     Q_Q(GraphicsPlotItem);
     gridItem = new Graphics2DPlotGrid(q);
+    qDebug() << "grid item" << gridItem->mapToScene(gridItem->pos());
     titleText = new QGraphicsSimpleTextItem(q);
     abscissText = new QGraphicsSimpleTextItem(q);
     ordinateText = new QGraphicsSimpleTextItem(q);
@@ -327,8 +328,8 @@ Graphics2DGraphItem *GraphicsPlotItem::addGraph(double *absciss, double *ordinat
 void GraphicsPlotItem::addDataItem(GraphicsDataItem *item)
 {
     item->setParentItem(d_ptr->gridItem);
-    if (d_ptr->m_legend != nullptr)
-        d_ptr->m_legend->addDataItem(item);
+    //    if (d_ptr->m_legend != nullptr)
+    //        d_ptr->m_legend->addDataItem(item);
 }
 
 void GraphicsPlotItem::setLegend(GraphicsPlotLegend *legend)
@@ -475,10 +476,11 @@ void GraphicsPlotItemPrivate::calculateAbscissGrid()
             lines->clear();
     };
 
+    //横坐标文本注释
     calculteLine(&abscissMainLines, &(gridItem->abscissMainLines.lines));
     abscissMainNocks->updateNocks(nocksList);
-    calculteLine(&abscissSecondaryLines, &(gridItem->abscissSecondaryLines.lines));
-    abscissSecondaryNocks->updateNocks(nocksList);
+    // calculteLine(&abscissSecondaryLines, &(gridItem->abscissSecondaryLines.lines));
+    // abscissSecondaryNocks->updateNocks(nocksList);
 }
 
 void GraphicsPlotItemPrivate::calculateOrdinateGrid()

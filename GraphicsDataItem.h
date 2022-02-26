@@ -80,6 +80,8 @@ public:
     QRectF boundingRect() const;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
+    void resetMinMaxLine(QPoint point);
+
 private:
     Q_DECLARE_PRIVATE(Graphics2DGraphItem)
     Graphics2DGraphItemPrivate *d_ptr;

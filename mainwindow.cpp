@@ -1,8 +1,8 @@
 ﻿#include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include "GraphicsPlotItem.h"
 #include <QDebug>
 #include <QGraphicsView>
+#include <QMouseEvent>
 #include <QOpenGLContext>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -19,8 +19,8 @@ void MainWindow::show2DHistogram()
 {
     // QGraphicsView graphicsView;
     QGraphicsScene *scene = new QGraphicsScene();
-    ui->graphicsView->setScene(scene);
-    ui->graphicsView->setGeometry(0, 0, 520, 520);
+    m_view->setScene(scene);
+    m_view->setGeometry(0, 0, 520, 520);
 
     Graphics2DHistogramItem *histogramm = new Graphics2DHistogramItem();
     histogramm->setBrush(QBrush(Qt::red));
@@ -40,34 +40,43 @@ void MainWindow::show2DHistogram()
 void MainWindow::show2DPolyItem()
 {
     QGraphicsScene *scene = new QGraphicsScene();
-    ui->graphicsView->setScene(scene);
+    m_view = new MyView(this);
+    ui->verticalLayout_2->addWidget(m_view);
+    m_view->setScene(scene);
     // ui->graphicsView->setGeometry(0, 0, 520, 520);
-    GraphicsPlotItem *plot = new GraphicsPlotItem();
-    scene->addItem(plot);
-    plot->setRect(QRect(0, 0, 500, 500));
+    m_plot = new GraphicsPlotItem();
+    scene->addItem(m_plot);
+    m_plot->setRect(QRect(0, 0, 200, 200));
     //    plot->setTitle(QString("Test title"));
-    plot->setAxisText(0, QString("x"));
-    plot->setAxisText(1, QString("y"));
+    m_plot->setAxisText(0, QString("x"));
+    m_plot->setAxisText(1, QString("y"));
     // plot->setAutoGrid(false);
-    plot->setAbscissaRange(0, 10);
-    plot->setOrdinateRange(0, 100);
-    auto bounding_rect = plot->boundingRect();
-    scene->setSceneRect(
-        QRect(bounding_rect.x() + 127, bounding_rect.y() - 500, bounding_rect.width(), bounding_rect.height()));
+    m_plot->setAbscissaRange(0, 15);
+    m_plot->setOrdinateRange(0, 100);
+    auto bounding_rect = m_plot->boundingRect();
+    qDebug() << bounding_rect;
+    scene->setSceneRect(QRect(bounding_rect.x(), bounding_rect.y(), bounding_rect.width(), bounding_rect.height()));
     QVector<double> absciss = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     QVector<double> ordinate = {12, 45, 34, 56, 76, 34, 56, 12, 4, 56};
 
-    Graphics2DGraphItem *dataItem = new Graphics2DGraphItem();
-    dataItem->setPen(QColor(Qt::blue));
-    dataItem->setData(absciss, ordinate);
+    m_data_item = new Graphics2DGraphItem();
+    scene->addItem(m_data_item);
+    m_data_item->setPen(QColor(Qt::blue));
+    m_data_item->setData(absciss, ordinate);
 
-    plot->addDataItem(dataItem);
+    m_plot->addDataItem(m_data_item);
 }
 
 void MainWindow::showOpenglWidget()
 {
     //    auto widget = new MyWidget();
     //    ui->verticalLayout_2->addWidget(widget);
+}
+
+void MainWindow::resetMinMaxLine(QPoint point)
+{
+    qDebug() << "data item" << m_data_item->scenePos();
+    m_data_item->resetMinMaxLine(point);
 }
 
 MyWidget::MyWidget(QWidget *parent) : QOpenGLWidget(parent)
@@ -168,4 +177,37 @@ void MyWidget::paintGL()
     //    }
 
     glFlush();
+}
+
+MyView::MyView(QWidget *parent) : QGraphicsView(parent)
+{
+    m_parent_widget = parent;
+}
+
+void MyView::mouseMoveEvent(QMouseEvent *event)
+{
+    auto pos = event->pos();
+    auto m_point = QPoint(mapToScene(pos).x(), mapToScene(pos).y());
+    if ((event->buttons() != Qt::LeftButton))
+        return;
+    qDebug() << "move";
+    auto widget = dynamic_cast<MainWindow *>(m_parent_widget);
+    if (widget)
+        widget->resetMinMaxLine(m_point);
+    QGraphicsView::mouseMoveEvent(event);
+}
+
+void MyView::mousePressEvent(QMouseEvent *event)
+{
+    qDebug() << "press";
+    auto pos = event->pos();
+    auto m_point = QPoint(mapToScene(pos).x(), mapToScene(pos).y());
+    qDebug() << "map to scene" << m_point << scene();
+    QGraphicsView::mousePressEvent(event);
+}
+
+void MyView::mouseReleaseEvent(QMouseEvent *event)
+{
+    qDebug() << "release";
+    QGraphicsView::mouseReleaseEvent(event);
 }
