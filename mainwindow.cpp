@@ -2,9 +2,9 @@
 #include "./ui_mainwindow.h"
 #include <QDebug>
 #include <QGraphicsView>
+#include <QLabel>
 #include <QMouseEvent>
 #include <QOpenGLContext>
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -43,28 +43,33 @@ void MainWindow::show2DPolyItem()
     m_view = new MyView(this);
     ui->verticalLayout_2->addWidget(m_view);
     m_view->setScene(scene);
+    m_view->m_scene = scene;
     // ui->graphicsView->setGeometry(0, 0, 520, 520);
-    m_plot = new GraphicsPlotItem();
-    scene->addItem(m_plot);
-    m_plot->setRect(QRect(0, 0, 200, 200));
-    //    plot->setTitle(QString("Test title"));
-    m_plot->setAxisText(0, QString("x"));
-    m_plot->setAxisText(1, QString("y"));
-    // plot->setAutoGrid(false);
-    m_plot->setAbscissaRange(0, 15);
-    m_plot->setOrdinateRange(0, 100);
-    auto bounding_rect = m_plot->boundingRect();
-    qDebug() << bounding_rect;
-    scene->setSceneRect(QRect(bounding_rect.x(), bounding_rect.y(), bounding_rect.width(), bounding_rect.height()));
+    // m_plot = new GraphicsPlotItem();
+    // scene->addItem(m_plot);
+    // m_plot->setRect(QRect(0, 0, 200, 200));
+    //    //    plot->setTitle(QString("Test title"));
+    //    m_plot->setAxisText(0, QString("x"));
+    //    m_plot->setAxisText(1, QString("y"));
+    //    // plot->setAutoGrid(false);
+    //    m_plot->setAbscissaRange(0, 15);
+    //    m_plot->setOrdinateRange(0, 100);
+    // auto bounding_rect = m_plot->boundingRect();
+    // scene->setSceneRect(QRect(bounding_rect.x(), bounding_rect.y(), bounding_rect.width(), bounding_rect.height()));
+    //    int scene_width = 800, scene_height = 200;
+    //    scene->setSceneRect(QRect(0, 0, scene_width, scene_height));
+
     QVector<double> absciss = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     QVector<double> ordinate = {12, 45, 34, 56, 76, 34, 56, 12, 4, 56};
 
-    m_data_item = new Graphics2DGraphItem();
-    scene->addItem(m_data_item);
-    m_data_item->setPen(QColor(Qt::blue));
-    m_data_item->setData(absciss, ordinate);
+    setData();
 
-    m_plot->addDataItem(m_data_item);
+    //    m_data_item = new Graphics2DGraphItem();
+    //    scene->addItem(m_data_item);
+    //    m_data_item->setPen(QColor(Qt::blue));
+    //    m_data_item->setData(absciss, ordinate);
+
+    //    m_plot->addDataItem(m_data_item);
 }
 
 void MainWindow::showOpenglWidget()
@@ -75,8 +80,132 @@ void MainWindow::showOpenglWidget()
 
 void MainWindow::resetMinMaxLine(QPoint point)
 {
-    qDebug() << "data item" << m_data_item->scenePos();
-    m_data_item->resetMinMaxLine(point);
+    auto min_aix = m_view->m_aix_min->scenePos();
+    auto max_aix = m_view->m_aix_max->scenePos();
+    if (min_aix.x() > max_aix.x())
+    {
+        auto last_min = m_view->m_aix_min;
+        m_view->m_aix_min = m_view->m_aix_max;
+        m_view->m_aix_max = last_min;
+    }
+    if (abs(point.x() - min_aix.x()) <= 4)
+    {
+        auto dx = point.x() - min_aix.x();
+        m_view->minAixMove(dx);
+    }
+    else if (abs(point.x() - max_aix.x()) <= 4)
+    {
+        auto dx = point.x() - max_aix.x();
+        m_view->maxAixMove(dx);
+    }
+    else
+    {
+    }
+}
+
+void MainWindow::setData()
+{
+    m_view->scene()->clear();
+    QVector<double> absciss = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    QVector<double> ordinate = {12, 45, 34, 56, 76, 34, 56, 12, 4, 196};
+
+    auto abs_sciss_max = std::max_element(absciss.begin(), absciss.end());
+    auto abs_sciss_min = std::min_element(absciss.begin(), absciss.end());
+    auto ordinate_max = std::max_element(ordinate.begin(), ordinate.end());
+    auto ordinate_min = std::min_element(ordinate.begin(), ordinate.end());
+
+    setAbsScissRange(*abs_sciss_min, *abs_sciss_max);
+    setCoordinateRange(*ordinate_min, *ordinate_max);
+
+    setMaxInEdit(*abs_sciss_max);
+    setMinInEdit(*abs_sciss_min);
+
+    m_min_x = *abs_sciss_min, m_max_x = *abs_sciss_max;
+
+    auto points_size = std::min(absciss.size(), ordinate.size());
+    for (int point_index = 0; point_index < points_size; point_index++)
+    {
+        auto m_dash_line = new QGraphicsLineItem();
+        auto left_x = absciss[point_index], right_x = absciss[point_index];
+        auto left_y = 0.0, right_y = ordinate[point_index];
+        auto left_point = transformPoint(QPointF(left_x, left_y));
+        auto right_point = transformPoint(QPointF(right_x, right_y));
+        m_dash_line->setLine(0, 0, right_point.x() - left_point.x(), right_point.y() - left_point.y());
+        m_dash_line->setPos(QPointF(left_point.x(), left_point.y()));
+        qDebug() << "set pos" << QPointF(left_point.x(), left_point.y()) << m_view->sceneRect().height()
+                 << m_view->size();
+        QPen *pen_dash = new QPen(QColor("red"), 2);
+        m_dash_line->setPen(*pen_dash);
+        m_view->scene()->addItem(m_dash_line);
+    }
+
+    setMaxAixX();
+    setMinAixX();
+    // m_view->scene()->update();
+}
+
+void MainWindow::setCoordinateRange(double min, double max)
+{
+    m_cord_range = Range(min, max);
+    auto scene_rect = m_view->sceneRect();
+    if (max > min)
+        m_cord_ratio = (scene_rect.height() / (max));
+}
+
+void MainWindow::setAbsScissRange(double min, double max)
+{
+    m_abss_range = Range(min, max);
+    auto scene_rect = m_view->scene()->sceneRect();
+    qDebug() << "abs sciss range" << scene_rect;
+    if (max > min)
+        m_abss_ratio = (scene_rect.width() / (max));
+}
+
+QPointF MainWindow::transformPoint(QPointF input)
+{
+    auto x = input.x(), y = input.y();
+    QPointF output;
+    output.setX(x * m_abss_ratio);
+    output.setY(m_view->sceneRect().height() - y * m_cord_ratio);
+    return output;
+}
+
+void MainWindow::setMinInEdit(int value)
+{
+    ui->lineEdit->setText(QString::number(value));
+}
+
+void MainWindow::setMaxInEdit(int value)
+{
+    ui->lineEdit_2->setText(QString::number(value));
+}
+
+void MainWindow::setMinAixX()
+{
+    auto m_dash_line = new QGraphicsLineItem();
+    auto left_point = transformPoint(QPointF(m_abss_range.min, 0));
+    auto right_point = transformPoint(QPointF(m_abss_range.min, m_cord_range.max));
+    m_dash_line->setLine(0, 0, right_point.x() - left_point.x(), right_point.y() - left_point.y());
+    m_dash_line->setPos(QPointF(left_point.x(), left_point.y()));
+    QPen *pen_dash = new QPen(QColor("black"), 2);
+    m_dash_line->setPen(*pen_dash);
+    m_view->scene()->addItem(m_dash_line);
+
+    m_view->m_aix_min = m_dash_line;
+}
+
+void MainWindow::setMaxAixX()
+{
+    auto m_dash_line = new QGraphicsLineItem();
+    m_view->scene()->addItem(m_dash_line);
+    auto left_point = transformPoint(QPointF(m_abss_range.max, 0));
+    auto right_point = transformPoint(QPointF(m_abss_range.max, m_cord_range.max));
+    m_dash_line->setLine(0, 0, right_point.x() - left_point.x(), right_point.y() - left_point.y());
+    m_dash_line->setPos(QPointF(left_point.x(), left_point.y()));
+    QPen *pen_dash = new QPen(QColor("black"), 2);
+    m_dash_line->setPen(*pen_dash);
+    m_view->m_aix_max = m_dash_line;
+    qDebug() << "max aix" << m_view->m_aix_max->scenePos();
 }
 
 MyWidget::MyWidget(QWidget *parent) : QOpenGLWidget(parent)
@@ -190,7 +319,6 @@ void MyView::mouseMoveEvent(QMouseEvent *event)
     auto m_point = QPoint(mapToScene(pos).x(), mapToScene(pos).y());
     if ((event->buttons() != Qt::LeftButton))
         return;
-    qDebug() << "move";
     auto widget = dynamic_cast<MainWindow *>(m_parent_widget);
     if (widget)
         widget->resetMinMaxLine(m_point);
@@ -199,10 +327,11 @@ void MyView::mouseMoveEvent(QMouseEvent *event)
 
 void MyView::mousePressEvent(QMouseEvent *event)
 {
-    qDebug() << "press";
     auto pos = event->pos();
-    auto m_point = QPoint(mapToScene(pos).x(), mapToScene(pos).y());
-    qDebug() << "map to scene" << m_point << scene();
+    qDebug() << "press" << pos;
+    auto m_point = QPointF(mapToScene(pos).x(), mapToScene(pos).y());
+    m_point = transformPoint(m_point);
+    qDebug() << "map to scene" << m_point << size();
     QGraphicsView::mousePressEvent(event);
 }
 
@@ -210,4 +339,41 @@ void MyView::mouseReleaseEvent(QMouseEvent *event)
 {
     qDebug() << "release";
     QGraphicsView::mouseReleaseEvent(event);
+}
+
+void MyView::resizeEvent(QResizeEvent *event)
+{
+    qDebug() << "Resize Event";
+    scene()->setSceneRect(QRect(0, 0, size().width(), size().height()));
+    auto widget = dynamic_cast<MainWindow *>(m_parent_widget);
+    if (widget)
+        widget->setData();
+    fitInView(scene()->sceneRect());
+    QGraphicsView::resizeEvent(event);
+}
+
+QPointF MyView::transformPoint(QPointF input)
+{
+    QPointF output;
+    output.setX(input.x());
+    output.setY(scene()->height() - input.y());
+    return output;
+}
+
+void MyView::minAixMove(int dx)
+{
+    auto lastPos = m_aix_min->scenePos();
+    m_aix_min->setPos(lastPos.x() + dx, lastPos.y());
+    auto widget = dynamic_cast<MainWindow *>(m_parent_widget);
+    if (widget)
+        widget->setMinInEdit(int((lastPos.x() + dx) / widget->m_abss_ratio));
+}
+
+void MyView::maxAixMove(int dx)
+{
+    auto lastPos = m_aix_max->scenePos();
+    m_aix_max->setPos(lastPos.x() + dx, lastPos.y());
+    auto widget = dynamic_cast<MainWindow *>(m_parent_widget);
+    if (widget)
+        widget->setMaxInEdit(int((lastPos.x() + dx) / widget->m_abss_ratio));
 }

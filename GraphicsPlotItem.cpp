@@ -197,9 +197,9 @@ void GraphicsPlotItemPrivate::calculateAndSetTransForm()
     transform.scale(scaleX, -scaleY);
     gridItem->setTransform(transform);
     ordinateMainNocks->setTransform(transform);
-    //        ordinateSecondaryNocks->setTransform(transform);
+    // ordinateSecondaryNocks->setTransform(transform);
     abscissMainNocks->setTransform(transform);
-    //    abscissSecondaryNocks->setTransform(transform);
+    // abscissSecondaryNocks->setTransform(transform);
 }
 
 GraphicsPlotItem::GraphicsPlotItem(QGraphicsItem *parent)
